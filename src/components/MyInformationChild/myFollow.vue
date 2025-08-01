@@ -1,6 +1,12 @@
 <template>
-  <el-table :data="tableData" border style="width: 100%">
-    <el-table-column prop="sectionName" label="板块名" width="180" />
+  <el-table :data="tableData" border style="width: 100%"  >
+    <el-table-column label="板块名" width="180">
+      <template #default="scope">
+        <span class="post-title" @click="pushSecDetail(scope.row.id)">
+          {{ scope.row.sectionName}}
+        </span>
+      </template>
+    </el-table-column>
     <el-table-column prop="xp" label="经验值" width="180" />
     <el-table-column prop="grade" label="等级" />
     <el-table-column prop="id" fixed="right" label="取消关注" min-width="120">
@@ -15,7 +21,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
@@ -25,7 +31,7 @@ interface Follow{
     grade : number,
     xp : number
 }
-
+const router = useRouter()
 const tableData = ref<Follow[]>([])
 
 onMounted(()=>{
@@ -96,4 +102,29 @@ const unfollowSec = async (sectionId: number) => {
       ElMessage.error('出现未知错误')
   }
 }
+
+//跳转板块详情
+const pushSecDetail = (sectionId: number) => {
+  router.push({
+    name: 'section',
+    params: { id: sectionId },
+  })
+}
 </script>
+
+<style scoped>
+  /* 为标题添加可点击样式 */
+.post-title {
+  cursor: pointer;
+  color: #409EFF;
+  transition: all 0.3s;
+}
+
+.post-title:hover {
+  color: #66b1ff;
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+
+</style>

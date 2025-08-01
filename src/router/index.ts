@@ -16,9 +16,11 @@ import MyInformation from '@/view/myInformation.vue'
 import MyFollow from '@/components/MyInformationChild/myFollow.vue'
 import Main from '@/components/MyInformationChild/main.vue'
 import MyReply from '@/components/MyInformationChild/reply.vue'
-import MyCollection from '@/components/MyInformationChild/collcetion.vue'
+import MyCollection from '@/components/MyInformationChild/collection.vue'
 import MyManage from '@/components/MyInformationChild/manage.vue'
 import MyPosts from '@/components/MyInformationChild/posts.vue'
+import SearchDetail from '@/view/SearchDetail.vue'
+import SearchDetailInSec from '@/view/SearchDetailInSec.vue'
 
 
 const router = createRouter({
@@ -62,7 +64,21 @@ const router = createRouter({
     {
       path: '/search',
       name: 'search',
-      component: Search
+      component: Search,
+    },
+    {
+      
+      path : '/searchdetail',
+      name : 'searchdetail',
+      component : SearchDetail,
+      meta: { title: '搜索结果' }
+    },
+    {
+      
+      path : '/searchdetailinSec',
+      name : 'searchdetailinSec',
+      component : SearchDetailInSec,
+      meta: { title: '搜索结果' }
     },
     {
       path: '/perInformation',

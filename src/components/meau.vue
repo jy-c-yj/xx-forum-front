@@ -12,6 +12,7 @@
         style="width: 200px"
         src="@/XX.svg"
         alt="XX-Forum logo"
+        @click="pushHome()"
       />
     </el-menu-item>
     
@@ -389,6 +390,10 @@ console.log()
     }
   })
 
+}
+
+const pushHome = ()=>{
+  router.push('/home')
 }
 
 </script>

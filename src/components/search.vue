@@ -1,61 +1,59 @@
 <template>
   <div class="common-layout">
-
-          <!-- 优化后的搜索区域 -->
-          <div class="content-header">
-            <div class="search-section">
-              <div class="search-container">
-                <div class="search-box">
-                  <el-input 
-                    v-model="input" 
-                    placeholder="搜索帖子、用户或话题..."
-                    class="custom-search-input"
-                  >
-                    <template #prefix>
-                      <el-icon class="search-icon"><Search /></el-icon>
-                    </template>
-                  </el-input>
-                  <el-button 
-                    type="primary" 
-                    class="search-button"
-                  >
-                    搜索
-                  </el-button>
-                </div>
-                
-                <!-- <div class="search-options">
-                  <el-radio-group v-model="searchType" size="large">
-                    <el-radio-button label="全部" />
-                    <el-radio-button label="帖子" />
-                    <el-radio-button label="用户" />
-                    <el-radio-button label="话题" />
-                  </el-radio-group>
-                </div>
-              </div>
-              
-              <div class="search-tips">
-                <el-tag type="info" size="small">热门: </el-tag>
-                <el-tag type="info" size="small" effect="plain">前端开发</el-tag>
-                <el-tag type="info" size="small" effect="plain">Vue3</el-tag>
-                <el-tag type="info" size="small" effect="plain">TypeScript</el-tag>
-                <el-tag type="info" size="small" effect="plain">Element Plus</el-tag>
-                <el-tag type="info" size="small" effect="plain">后端技术</el-tag> -->
-              </div>
-            </div>
+    <div class="content-header">
+      <div class="search-section">
+        <div class="search-container">
+          <div class="search-box">
+            <el-input 
+              v-model="searchText"  
+              placeholder="搜索帖子、用户或话题..."
+              class="custom-search-input"
+              @keyup.enter="handleSearch" 
+            >
+              <template #prefix>
+                <el-icon class="search-icon"><Search /></el-icon>
+              </template>
+            </el-input>
+            <el-button 
+              type="primary" 
+              class="search-button"
+              @click="handleSearch" 
+            >
+              搜索
+            </el-button>
           </div>
-        
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup name="search">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
-const input = ref('');
-const searchType = ref('全部');
+const searchText = ref('');  // 修改变量名为 searchText
+const router = useRouter();
 
+const handleSearch = () => {
+  const keyword = searchText.value.trim();
+  if (keyword) {
+    router.push({
+      name: 'searchdetail',
+      query: { q: keyword }  // 使用query参数传递搜索词
+    });
+  } else {
+    ElMessage.warning('请输入搜索内容');
+  }
+};
+
+// 暴露searchText给父组件
+defineExpose({
+  searchText
+});
 </script>
-
 <style scoped>
 /* 内容区域头部 */
 .content-header {

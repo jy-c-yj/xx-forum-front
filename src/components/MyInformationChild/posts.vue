@@ -107,6 +107,7 @@ const refashPostsData = async()=>{
 
         if (pageNum.value === 1) {
           posts.value = response.data.data.records
+          console.log(" response.data.data.records====", response.data.data.records)
         } else {
           
           posts.value.push(...response.data.data.records)

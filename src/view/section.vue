@@ -2,7 +2,7 @@
   <div id="Sec" style="height: 100%;">
     <div class="common-layout" style="height: 100%;">
       <div class="edit-icon">
-        <el-icon @click="pushPost" ><EditPen /></el-icon>
+        <el-icon @click="pushPost"><EditPen /></el-icon>
       </div>
 
       <el-container style="height: 100%;">
@@ -52,12 +52,41 @@
             加载板块信息中...
           </div>
           
+          <div class="search-box">
+            <el-input 
+              v-model="searchText"  
+              placeholder="搜索帖子、用户或话题..."
+              class="custom-search-input"
+              @keyup.enter="handleSearch" 
+            >
+              <template #prefix>
+                <el-icon class="search-icon"><Search /></el-icon>
+              </template>
+            </el-input>
+            <el-button 
+              type="primary" 
+              class="search-button"
+              @click="handleSearch" 
+            >
+              搜索
+            </el-button>
+          </div>
+          
+          <!-- 新增排序按钮区域 -->
+          <div class="sort-controls">
+            <el-radio-group v-model="sortType" size="large">
+              <el-radio-button label="1">最新排序</el-radio-button>
+              <el-radio-button label="2">热门排序</el-radio-button>
+            </el-radio-group>
+          </div>
+          
           <!-- 帖子内容区域 -->
           <div class="posts-container">
             <posts 
               v-if="sectionId > 0" 
-              :key="sectionId" 
+              :key="sectionId + '-' + sortType" 
               :sectionId="sectionId"
+              :sortType="sortType"
             ></posts>
           </div>
         </el-main>
@@ -105,7 +134,7 @@
 
 <script setup lang="ts" name="section">
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute,useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { Loading, EditPen } from '@element-plus/icons-vue'
@@ -136,6 +165,9 @@ interface PostForm {
   title: string
   content: string
 }
+
+// 新增排序变量 - 1:最新排序（默认），2:热门排序
+const sortType = ref(1)
 
 const route = useRoute()
 const section = ref<Section | null>(null)
@@ -325,7 +357,25 @@ const submitPost = async () => {
   }
 }
 
+const searchText = ref('');  // 修改变量名为 searchText
+const router = useRouter();
 
+const handleSearch = () => {
+  const keyword = searchText.value.trim();
+  if (keyword && section.value) {
+    router.push({
+      name: 'searchdetailinSec',
+      query: { q: keyword ,s: section.value.id }  // 使用query参数传递搜索词
+    });
+  } else {
+    ElMessage.warning('请输入搜索内容');
+  }
+};
+
+// 暴露searchText给父组件
+defineExpose({
+  searchText
+});
 </script>
 
 <style scoped>
@@ -610,5 +660,91 @@ const submitPost = async () => {
   justify-content: flex-end;
   padding: 10px 20px;
 }
+
+
+
+/* 新增搜索框专属样式 */
+.search-box {
+  display: flex;
+  margin: 15px 15px 15px auto; /* 右侧自动外边距实现右对齐 */
+  max-width: 600px;
+  gap: 8px;
+  justify-content: flex-end; /* 确保内容右对齐 */
+  align-items: center;       /* 垂直居中对齐 */
+}
+
+
+
+
+
+.search-icon {
+  font-size: 16px !important;
+  color: #bbb !important;
+  margin-right: 8px;
+}
+
+.search-button {
+  height: 36px !important; /* 与输入框同高 */
+  border-radius: 0 !important; /* 完全方形按钮 */
+  background: linear-gradient(135deg, #409eff, #6db0ff) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 0 20px !important;
+  transition: transform 0.2s ease;
+  align-self: stretch !important; /* &#9989; 确保按钮高度完全匹配 */
+}
+
+.search-button:hover {
+  transform: scale(1.02);
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .search-box {
+    flex-direction: column;
+    padding: 0 10px;
+    justify-content: stretch !important; /* 移动端恢复常规流 */
+    margin: 15px !important; /* 重置外边距 */
+  }
+  
+  
+  .search-button {
+    margin-top: 8px;
+    border-radius: 0 !important;
+    height: auto !important; /* 恢复自适应高度 */
+    width: 100%; /* 移动端按钮占满宽度 */
+  }
+}
+
+
+/* 新增排序控制区域样式 */
+.sort-controls {
+  margin: 20px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 可选：调整排序按钮的样式 */
+.sort-controls .el-radio-group {
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.sort-controls .el-radio-button {
+  --el-radio-button-checked-bg-color: #ffffff;
+  --el-radio-button-checked-text-color: #409eff;
+  --el-radio-button-checked-border-color: #409eff;
+}
+
+.sort-controls .el-radio-button:first-child .el-radio-button__inner {
+  border-radius: 4px 0 0 4px;
+}
+
+.sort-controls .el-radio-button:last-child .el-radio-button__inner {
+  border-radius: 0 4px 4px 0;
+}
+
 
 </style>
