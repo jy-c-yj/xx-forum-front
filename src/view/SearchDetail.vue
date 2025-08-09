@@ -209,7 +209,7 @@ const fetchSearchResults = async (keyword: string, loadMore = false ) => {
     
     // 处理板块结果
     const newSections = sectionsResponse.data.data.records || [];
-    console.log("newPosts==",newPosts)
+    console.log("newSections==",newSections)
     if (loadMore) {
       results_Section.value = [...results_Section.value, ...newSections];
     } else {

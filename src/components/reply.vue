@@ -17,12 +17,23 @@
       <div class="reply-container">
         <div class="reply-stats">
           <h2 class="reply-count">共 {{ replyCount }} 条回复</h2>
-          <div class="sort-options">
-            
-            <div class="sort-btn active">最新</div>
-            <div class="sort-btn">最热</div>
-            <div class="sort-btn">最早</div>
-          </div>
+            <div class="sort-options">
+                <div 
+                    class="sort-btn" 
+                    :class="{ active: type === 1 }"
+                    @click="changeSortType(1)"
+                >最热</div>
+                <div 
+                    class="sort-btn" 
+                    :class="{ active: type === 2 }"
+                    @click="changeSortType(2)"
+                >正序</div>
+                <div 
+                    class="sort-btn" 
+                    :class="{ active: type === 3 }"
+                    @click="changeSortType(3)"
+                >倒序</div>
+            </div>
         </div>
         
         <ul v-infinite-scroll="loadMore" class="reply-list" :infinite-scroll-disabled="loading" infinite-scroll-distance="50">
@@ -108,6 +119,9 @@ import formatDateTime from '@/hooks/format'
 import { ElMessage } from 'element-plus';
 
 
+
+//1为最热，2为正序，3为倒叙
+const type = ref(1)
 // 日期时间格式化函数
 let {formatTime} = formatDateTime()
 
@@ -186,30 +200,45 @@ const toggleShowChildren = (reply: Reply) => {
   }
 };
 
+// 切换排序类型
+const changeSortType = (sortType: number) => {
+    if (type.value === sortType) return // 如果已经是当前排序，则不操作
+    
+    type.value = sortType
+    // 重置状态
+    currentPage.value = 1
+    Replies.value = []
+    noMoreData.value = false
+    loading.value = false
+    
+    // 重新加载数据
+    fetchReplies()
+}
 
-//获取回复数据
 // 获取回复数据
 const fetchReplies = async () => {
-  if (loading.value || noMoreData.value) return
-  
-  loading.value = true
-  try {
-    const response = await axios.get('http://localhost:8080/user/reply', {
-      params: {
-        page: currentPage.value,
-        pageSize: pageSize.value,
-        postid: props.postId
-      },
-      headers: {
-        token: localStorage.getItem('token') || ''
-      }
-    })
+    if (loading.value || noMoreData.value) return
     
-    const newReplyList = response.data.data.records
-    if (newReplyList.length === 0) {
-      noMoreData.value = true
-      return
-    }
+    loading.value = true
+    try {
+        const response = await axios.get('http://localhost:8080/user/reply', {
+          params: {
+            page: currentPage.value,
+            pageSize: pageSize.value,
+            postid: props.postId,
+            type : type.value
+          },
+          headers: {
+            token: localStorage.getItem('token') || ''
+        }
+      })
+
+        
+      const newReplyList = response.data.data.records
+      if (newReplyList.length === 0) {
+          noMoreData.value = true
+          return
+      }
     
     // 处理回复数据，添加showChildren属性
     const processedList = await Promise.all(newReplyList.map(async (reply: any) => {
@@ -853,6 +882,19 @@ const checktoggleLike = async (replyId: number): Promise<boolean> => {
 .reply-actions {
   display: flex;
   align-items: center;
+}
+
+/* 添加排序按钮激活样式 */
+.sort-btn.active {
+    background-color: #409eff;
+    color: white;
+    border-color: #409eff;
+}
+
+/* 添加悬停效果 */
+.sort-btn:hover {
+    background-color: #f5f7fa;
+    cursor: pointer;
 }
 
 </style>

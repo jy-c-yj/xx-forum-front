@@ -15,6 +15,8 @@
         @click="pushHome()"
       />
     </el-menu-item>
+
+    <el-icon class="Message" @click="toMessage()" ><Message /></el-icon>
     
     <!-- 右侧功能区 -->
     <div class="flex-grow"></div>
@@ -31,13 +33,13 @@
             <el-dropdown-item command="a" class="dropdown-item">
               <el-icon><User /></el-icon>登录
             </el-dropdown-item>
-            <el-dropdown-item command="b" class="dropdown-item">
+            <el-dropdown-item command="b" class="dropdown-item" :disabled="!user.id">
               <el-icon><Document /></el-icon>编辑资料
             </el-dropdown-item>
-            <el-dropdown-item command="changePassword" class="dropdown-item">
+            <el-dropdown-item command="changePassword" class="dropdown-item" :disabled="!user.id">
               <el-icon><Lock /></el-icon>修改密码
             </el-dropdown-item>
-            <el-dropdown-item command="e" class="dropdown-item">
+            <el-dropdown-item command="e" class="dropdown-item" :disabled="!user.id">
               <el-icon><plus /></el-icon>创建板块 
             </el-dropdown-item>
             <el-dropdown-item divided command="d" class="dropdown-item logout">
@@ -232,9 +234,24 @@ const handleCommand = (command: string | number | object) => {
        location.reload()
 
 
-    }else if(command === 'e'){
+    }
+    else if (command === 'e') {
+    // 在新标签页打开创建板块页面
+    const route = router.resolve({
+      name: 'CreateSection' // 使用路由名称
+    })
+    window.open(route.href, '_blank')
+    }
+    else if(command === 'e'){
       createSection()
     }
+}
+
+const toMessage = ()=>{
+  const route = router.resolve({
+      name: 'chatMessage' // 使用路由名称
+    })
+    window.open(route.href, '_blank')
 }
 
 // 修改密码对话框状态
@@ -428,6 +445,7 @@ const pushHome = ()=>{
 .flex-grow {
   flex-grow: 1;
 }
+
 
 /* 右侧菜单项 */
 .right-menu-item {

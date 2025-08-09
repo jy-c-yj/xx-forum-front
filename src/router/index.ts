@@ -21,6 +21,10 @@ import MyManage from '@/components/MyInformationChild/manage.vue'
 import MyPosts from '@/components/MyInformationChild/posts.vue'
 import SearchDetail from '@/view/SearchDetail.vue'
 import SearchDetailInSec from '@/view/SearchDetailInSec.vue'
+import CreateSection from '@/view/createSection.vue'
+import ChatMessage from '@/view/chatMessage.vue'
+import PrivateMessageChat from '@/components/ChatMessageChild/PrivateMessageChat.vue'
+import SystemInformation from '@/components/ChatMessageChild/SystemInformation.vue'
 
 
 const router = createRouter({
@@ -141,6 +145,28 @@ const router = createRouter({
         }
       ]
 
+    },
+    {
+      path: '/createSection',
+      name: 'CreateSection',
+      component: CreateSection
+    },
+    {
+      path: '/chatMessage',
+      name: 'chatMessage',
+      component : ChatMessage,
+      children : [
+        {
+          path : 'PrivateMessageChat',
+          name : 'PrivateMessageChat',
+          component : PrivateMessageChat
+        },
+        {
+          path : 'SystemInformation',
+          name : 'SystemInformation',
+          component : SystemInformation
+        }
+      ]
     }
   ],
 })
