@@ -25,7 +25,11 @@ import CreateSection from '@/view/createSection.vue'
 import ChatMessage from '@/view/chatMessage.vue'
 import PrivateMessageChat from '@/components/ChatMessageChild/PrivateMessageChat.vue'
 import SystemInformation from '@/components/ChatMessageChild/SystemInformation.vue'
-
+import SetSections from '@/view/setSections.vue'
+import UpdataSection from '@/components/ManageSection/updataSection.vue'
+import ManageSecPost from '@/components/ManageSection/manageSecPost.vue'
+import ManageSecUser from '@/components/ManageSection/manageSecUser.vue'
+import OperationLog from '@/components/ManageSection/OperationLog.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -141,11 +145,11 @@ const router = createRouter({
         {
           path: 'myManage',
           name: 'myManage',
-          component: MyManage
+          component: MyManage,
         }
       ]
-
     },
+ 
     {
       path: '/createSection',
       name: 'CreateSection',
@@ -167,7 +171,35 @@ const router = createRouter({
           component : SystemInformation
         }
       ]
-    }
+    },
+    {
+    path: '/setSections/:sectionId',
+    name: 'setSections',
+    component: SetSections,
+    props: true,
+    children: [
+        {
+          path : 'UpdataSection',
+          name : 'UpdataSection',
+          component : UpdataSection
+        },
+        {
+          path : 'ManageSecPost',
+          name : 'ManageSecPost',
+          component : ManageSecPost
+        },
+        {
+          path : 'ManageSecUser',
+          name : 'ManageSecUser',
+          component : ManageSecUser
+        },
+        {
+          path : 'OperationLog',
+          name : 'OperationLog',
+          component : OperationLog
+        }
+    ]
+    },   
   ],
 })
 

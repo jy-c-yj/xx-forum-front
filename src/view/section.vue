@@ -4,6 +4,16 @@
       <div class="edit-icon">
         <el-icon @click="pushPost"><EditPen /></el-icon>
       </div>
+      <div v-if = "userSigIn">
+        <div class="edit-icon-1" v-if="signInStatus === true">
+          <el-icon ><Calendar /></el-icon>
+        </div>
+        <div class="edit-icon-1" v-else>
+          <el-icon @click="sign(userSigIn.id)"><Ship /></el-icon>
+        </div>        
+      </div>
+
+
 
       <el-container style="height: 100%;">
         <el-aside width="200px"></el-aside>
@@ -142,6 +152,7 @@ import search from '@/components/search.vue'
 import posts from '@/components/posts.vue'
 // 添加表单验证规则
 import type { FormInstance, FormRules } from 'element-plus'
+import { el } from 'element-plus/es/locales.mjs'
 
 interface Section {
   id: number
@@ -165,6 +176,16 @@ interface PostForm {
   title: string
   content: string
 }
+
+
+interface UsesrSignIn {
+  id : number
+  status : boolean
+  continuousDays : number
+  lastSignDate : string
+
+}
+
 
 // 新增排序变量 - 1:最新排序（默认），2:热门排序
 const sortType = ref(1)
@@ -190,6 +211,8 @@ const fetchSectionData = async (id: number) => {
       section.value = response.data.data
       // 获取板块信息后检查关注状态
       checkFollowStatus(id)
+      // 获取板块信息后检查签到状态
+      getSignStatus(id)
     } else {
       ElMessage.error(response.data.msg || '获取板块信息失败')
     }
@@ -302,7 +325,7 @@ const postRules = ref<FormRules<PostForm>>({
   ]
 })
 
-// 修改pushPost函数 - 只打开弹窗
+// 发帖
 const pushPost = () => {
   if (!localStorage.getItem('token')) {
     ElMessage.error('登录后即可发帖')
@@ -371,6 +394,56 @@ const handleSearch = () => {
     ElMessage.warning('请输入搜索内容');
   }
 };
+
+
+const userSigIn = ref<UsesrSignIn | null>(null)//用户签到信息
+const signInStatus = ref<boolean | undefined>(false)
+
+//获取签到状态
+const getSignStatus = async (id : number)=>{
+  try{
+    const response = await axios.get(`http://localhost:8080/user/SignIn/${id}`,
+      {
+        headers : {
+          token: localStorage.getItem('token') || '' 
+        }
+      }
+    )
+    if(response.data.code === 1){
+      //成功获取信息
+      userSigIn.value = response.data.data
+      signInStatus.value = userSigIn.value?.status
+    }else{
+      console.log(response.data.msg)
+    }
+
+    
+
+  }catch{
+    console.log("获取签到信息出现异常",id)
+    ElMessage.error('出现异常')
+  }
+
+}
+
+
+//签到
+const sign = async (id : number)=>{
+  try{
+    const response = await axios.patch(`http://localhost:8080/user/SignIn/doSignIn/${id}`,{},
+      { headers: { token: localStorage.getItem('token') || '' } }
+    )
+    if(response.data.code === 1){
+      ElMessage.success('签到成功')
+      signInStatus.value = true
+    }else{
+      ElMessage.error(response.data.msg)
+    }
+
+  }catch{
+    ElMessage.error('签到失败')
+  }
+}
 
 // 暴露searchText给父组件
 defineExpose({
@@ -618,6 +691,36 @@ defineExpose({
 /* 响应式调整 */
 @media (max-width: 1200px) {
   .edit-icon {
+    right: 20px; /* 小屏幕时固定在右侧 */
+  }
+}
+
+/* 签到图标样式 */
+.edit-icon-1{
+  position: fixed;
+  top: 550px; /* 距离顶部距离，根据需要调整 */
+  right: calc(50% - 750px + 20px); /* 关键计算：居中定位+右偏移 */
+  z-index: 1000; /* 确保在最上层 */
+  background: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-icon-1:hover {
+  background: #f5f7fa;
+  transform: scale(1.05);
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .edit-icon-1 {
     right: 20px; /* 小屏幕时固定在右侧 */
   }
 }

@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div class="post-detail-container" v-if="postdata">
+      
       <!-- 帖子头部 -->
       <div class="post-header">
         <h1 class="post-title">{{ postdata.title }}</h1>
@@ -8,7 +9,9 @@
         <div class="post-meta">
           <img :src="postdata.image || 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'" 
                class="author-avatar"
-               alt="作者头像">
+               alt="作者头像" 
+               plain @click="dialogBottonVisible = true"
+               >
           <div class="author-info">
             <div class="author-name">{{ postdata.username }}</div>
             <div class="post-time">
@@ -25,7 +28,56 @@
             </div>                 
           </div>
         </div>
+        <!-- 新增：版主操作按钮 -->
+        <div class="moderator-actions" v-if="isModerator">
+            <el-dropdown @command="handleModeratorCommand">
+              <el-button type="warning">
+                版主操作<i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="banPost">封禁帖子</el-dropdown-item>
+                  <el-dropdown-item command="pinPost">置顶帖子</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+        </div>
       </div>
+     
+
+      <!-- 新增：封禁帖子对话框 -->
+      <el-dialog v-model="banDialogVisible" title="封禁帖子" width="500px">
+        <el-form :model="banForm">
+          <el-form-item label="封禁原因">
+            <el-input 
+              v-model="banForm.reason" 
+              type="textarea" 
+              :rows="4"
+              placeholder="请输入封禁原因"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="banDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="confirmBanPost(postId)">确认封禁</el-button>
+          </span>
+        </template>
+      </el-dialog>
+
+
+      <el-dialog v-model="dialogBottonVisible"  width="800">
+        <el-button class="!ml-0" >
+            个人信息
+        </el-button>   
+        <el-button class="!ml-1" v-if="isUser" @click="send(postdata.userId)">
+            私聊
+        </el-button>
+        <el-button class="!ml-0" v-if="isModerator && isUser" @click="confirmBanUser(postdata.userId,postdata.sectionId)">
+            封禁
+        </el-button>     
+      </el-dialog>   
+     
       
       <!-- 帖子内容 -->
       <div class="post-content" v-html="postdata.content"></div>
@@ -78,10 +130,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute,useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import Reply from '@/components/reply.vue'
+import ChatMessage from './chatMessage.vue'
+import ModeratorCommand from '@/hooks/ModeratorCommand'
 
 // 定义帖子详情数据类型
 interface PostDetail {
@@ -91,6 +145,7 @@ interface PostDetail {
   username: string;
   userId: number;
   image: string;
+  sectionId : number;
   viewCount: number;
   replyCount: number;
   collectCount: number;
@@ -102,11 +157,15 @@ interface PostDetail {
 }
 
 const route = useRoute()
+const router = useRouter()
 const postdata = ref<PostDetail | null>(null)
 const postId = ref<number>(0)
 const replyCount = ref<number>(0)
 const likeLoading = ref(false) // 点赞操作加载状态
 const collectLoading = ref(false) // 收藏操作加载状态
+const isUser = ref(true)
+
+
 
 // 从路由参数获取帖子ID
 postId.value = parseInt(route.params.id as string)
@@ -137,7 +196,15 @@ const fetchPostDetail = async (id: number) => {
     });
     
     postdata.value = response.data.data;
-    
+
+    //判断发帖人是否为此用户
+    const u = JSON.parse(localStorage.getItem('user') as string) 
+    if(response.data.data.userId === u.id ){
+      isUser.value = false
+    }
+    console.log("u1 = {},u2 = {}",response.data.data.userId , u.id,isUser.value)
+
+    checkUserModeratorStatus(response.data.data.sectionId)
     // 如果详情中包含回复数，更新replyCount
     if (postdata.value?.replyCount) {
       replyCount.value = postdata.value.replyCount;
@@ -462,6 +529,33 @@ onMounted(() => {
     fetchPostDetail(postId.value);
   }
 });
+
+import cM from '@/hooks/chatMessage'
+const {dialogBottonVisible,chatMessage} = cM()
+const send = (id : number)=>{
+    chatMessage(id)
+    const r = router.resolve({
+      name: 'chatMessage' // 使用路由名称
+    })
+    window.open(r.href, '_blank')
+    
+}
+
+//==========================================================
+
+const handleModeratorCommand = async (command:any)=>{
+  if (command === 'banPost') {
+          banDialogVisible.value = true
+          console.log("asdasdsadasdsa")
+        } else if (command === 'pinPost') {
+          pinPost();
+        }
+
+}
+
+const {pinPost,confirmBanPost,checkUserModeratorStatus,confirmBanUser,isModerator,banDialogVisible,banForm} = ModeratorCommand()  
+
+//==========================================================
 </script>
 
 <style scoped>
@@ -637,6 +731,28 @@ onMounted(() => {
                 flex-wrap: wrap;
                 gap: 10px;
             }
+        }
+        /*================================================*/
+          /* 响应式调整 */
+        @media (max-width: 768px) {
+          .moderator-actions {
+            margin-left: 0;
+            margin-top: 10px;
+            width: 100%;
+          }
+          
+          .moderator-actions .el-dropdown {
+            width: 100%;
+          }
+          
+          .moderator-actions .el-button {
+            width: 100%;
+          }
+        }
+
+          /* 新增：版主操作按钮样式 */
+        .moderator-actions {
+          margin-left: 20px;
         }
 
   </style>

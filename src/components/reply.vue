@@ -38,7 +38,7 @@
         
         <ul v-infinite-scroll="loadMore" class="reply-list" :infinite-scroll-disabled="loading" infinite-scroll-distance="50">
           <li v-for="(reply, index) in Replies" :key="reply.id" class="reply-item">
-            <img :src="reply.image" class="avatar" alt="用户头像">
+            <img :src="reply.image" class="avatar" alt="用户头像" plain @click="dialogBottonVisible = true">
             <div class="reply-content">
               <div class="reply-header">
                 <div class="user-info">
@@ -63,7 +63,7 @@
                 </button>
                 <ul v-if="reply.showChildren" class="children-list">
                   <li v-for="child in reply.children" :key="child.id" class="child-item">
-                    <img :src="child.image" class="avatar" alt="用户头像">
+                    <img :src="child.image" class="avatar" alt="用户头像" plain @click="dialogBottonVisible = true">
                     <div class="reply-content">
                       <div class="reply-header">
                         <div class="user-info">
@@ -85,6 +85,15 @@
               </div>
 
             </div>
+
+            <el-dialog v-model="dialogBottonVisible"  width="800">
+              <el-button class="!ml-0" >
+                个人信息
+              </el-button>   
+              <el-button class="!ml-1" @click="send(reply.userId)">
+                私聊
+              </el-button>     
+            </el-dialog>              
           </li>
           
           <div v-if="loading" class="loading-indicator">
@@ -108,6 +117,7 @@
     </div>
   </div>
 
+
 </template>
 
 
@@ -117,9 +127,10 @@ import { ref, onMounted, defineProps } from 'vue';
 import axios from 'axios'
 import formatDateTime from '@/hooks/format'
 import { ElMessage } from 'element-plus';
+import { useRouter } from 'vue-router';
 
 
-
+const router = useRouter();
 //1为最热，2为正序，3为倒叙
 const type = ref(1)
 // 日期时间格式化函数
@@ -298,6 +309,7 @@ const addReply = async () => {
   }
   
   try {
+
     const response = await axios.post(
       'http://localhost:8080/user/newReply',
       {
@@ -396,8 +408,9 @@ const toggleLike = async (reply: Reply) => {
 // 执行点赞操作
 const doToggleLike = async (reply: Reply) => {
   const replyId = reply.id
+  const postId = props.postId
   try {
-    const response = await axios.post(`http://localhost:8080/user/doToggleLike/${replyId}`, null, {
+    const response = await axios.post(`http://localhost:8080/user/doToggleLike/${postId}/${replyId}`, null, {
       headers: {
         token: localStorage.getItem('token') || ''
       }
@@ -485,6 +498,19 @@ const checktoggleLike = async (replyId: number): Promise<boolean> => {
     return false;
   }
 }
+
+
+import cM from '@/hooks/chatMessage'
+const {dialogBottonVisible,chatMessage} = cM()
+const send = (id : number)=>{
+    chatMessage(id)
+    const route = router.resolve({
+      name: 'chatMessage' // 使用路由名称
+    })
+    window.open(route.href, '_blank')
+    
+}
+
 </script>
 
 <style scoped>
