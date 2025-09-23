@@ -35,6 +35,11 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+        path: '/',
+        redirect: '/home' 
+    },
+    {
+      
       path: '/login',
       name: 'login',
       component: Login,
@@ -180,6 +185,7 @@ const router = createRouter({
     name: 'setSections',
     component: SetSections,
     props: true,
+    redirect: { name: 'UpdataSection' }, 
     children: [
         {
           path : 'UpdataSection',

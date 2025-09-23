@@ -75,14 +75,9 @@ const handleClick = (id : number) => {
 // 管理板块
 const setSections = async (sectionId: number) => {
 
-  const route = router.resolve({
-    name: 'setSections',
-    params: {
-      sectionId : sectionId
-    }
-  });
-  window.open(route.href, '_blank')
-
+  const url = `/setSections/${sectionId}/UpdataSection`;
+  window.open(url, '_blank');
+  
 }
 
 //跳转板块详情
