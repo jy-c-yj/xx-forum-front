@@ -38,7 +38,7 @@
         
         <ul v-infinite-scroll="loadMore" class="reply-list" :infinite-scroll-disabled="loading" infinite-scroll-distance="50">
           <li v-for="(reply, index) in Replies" :key="reply.id" class="reply-item">
-            <img :src="reply.image" class="avatar" alt="用户头像" plain @click="dialogBottonVisible = true">
+            <img :src="reply.image" class="avatar" alt="用户头像" plain @click="checkUser(reply.userId)">
             <div class="reply-content">
               <div class="reply-header">
                 <div class="user-info">
@@ -63,7 +63,7 @@
                 </button>
                 <ul v-if="reply.showChildren" class="children-list">
                   <li v-for="child in reply.children" :key="child.id" class="child-item">
-                    <img :src="child.image" class="avatar" alt="用户头像" plain @click="dialogBottonVisible = true">
+                    <img :src="child.image" class="avatar" alt="用户头像" plain @click="checkUser(child.userId)">
                     <div class="reply-content">
                       <div class="reply-header">
                         <div class="user-info">
@@ -90,11 +90,16 @@
               <el-button class="!ml-0" >
                 个人信息
               </el-button>   
-              <el-button class="!ml-1" @click="send(reply.userId)">
+              <el-button class="!ml-1" v-if="isUser" @click="send(reply.userId)">
                 私聊
-              </el-button>     
+              </el-button>   
+              <el-button  class="!ml-2" v-if="isModerator && isUser" @click="confirmBanUser(reply.userId,sectionId)">
+                封禁
+              </el-button>  
             </el-dialog>              
           </li>
+
+
           
           <div v-if="loading" class="loading-indicator">
             <i class="fas fa-spinner"></i> 加载中...
@@ -179,6 +184,8 @@ const dialogVisible = ref(false) // 控制回复弹窗显示
 const currentReply = ref<Reply | null>(null) // 当前操作的回复项
 const u = JSON.parse(localStorage.getItem('user') as string)
 const uImage =ref('')
+const sectionId = ref(0)
+
 if(!u){
    uImage.value = 'https://web-cyj-sky.oss-cn-beijing.aliyuncs.com/d9480ea4-86db-43af-9008-3196b3c89ae2.jpg'
 }else{
@@ -246,6 +253,9 @@ const fetchReplies = async () => {
 
         
       const newReplyList = response.data.data.records
+      checkUserModeratorStatus(response.data.data.sectionId)
+      sectionId.value = response.data.data.sectionId
+      console.log(sectionId.value)
       if (newReplyList.length === 0) {
           noMoreData.value = true
           return
@@ -315,7 +325,8 @@ const addReply = async () => {
       {
         content: newReplyContent.value,
         postId: props.postId,
-        parentId: parentId.value
+        parentId: parentId.value,
+        sectionId: sectionId.value
       },
       {
         headers: {
@@ -510,6 +521,27 @@ const send = (id : number)=>{
     window.open(route.href, '_blank')
     
 }
+
+const isUser = ref(true)
+const checkUser = ( userId : number) => {
+    //判断发帖人是否为此用户
+    const u = JSON.parse(localStorage.getItem('user') as string) 
+    if(userId === u.id ){
+      isUser.value = false
+    }else{
+      isUser.value = true
+    }  
+    dialogBottonVisible.value = true
+    console.log("u1 = {},u2 = {}",userId , u.id,isUser.value)
+}
+
+//==========================================================
+
+import ModeratorCommand from '@/hooks/ModeratorCommand'
+
+const {pinPost,unpinPost,confirmBanPost,checkUserModeratorStatus,confirmBanUser,isModerator,banDialogVisible,banForm} = ModeratorCommand()  
+
+//==========================================================
 
 </script>
 

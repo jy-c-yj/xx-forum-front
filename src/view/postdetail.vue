@@ -37,7 +37,8 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="banPost">封禁帖子</el-dropdown-item>
-                  <el-dropdown-item command="pinPost">置顶帖子</el-dropdown-item>
+                  <el-dropdown-item v-if="postdata.isTop" command="unpinPost">取消置顶</el-dropdown-item>
+                  <el-dropdown-item v-else command="pinPost">置顶帖子</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -150,6 +151,7 @@ interface PostDetail {
   replyCount: number;
   collectCount: number;
   likeCount : number;
+  isTop : boolean;
   createdTime: string;
   lastReplyTime: string | null;
   liked : boolean; // 记录点赞状态
@@ -548,12 +550,14 @@ const handleModeratorCommand = async (command:any)=>{
           banDialogVisible.value = true
           console.log("asdasdsadasdsa")
         } else if (command === 'pinPost') {
-          pinPost();
+          pinPost(postId.value);
+        } else if (command === 'unpinPost') {
+          unpinPost(postId.value)
         }
 
 }
 
-const {pinPost,confirmBanPost,checkUserModeratorStatus,confirmBanUser,isModerator,banDialogVisible,banForm} = ModeratorCommand()  
+const {pinPost,unpinPost,confirmBanPost,checkUserModeratorStatus,confirmBanUser,isModerator,banDialogVisible,banForm} = ModeratorCommand()  
 
 //==========================================================
 </script>

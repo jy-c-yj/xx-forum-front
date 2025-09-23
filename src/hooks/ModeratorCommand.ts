@@ -60,11 +60,28 @@ export default function(){
     banDialogVisible.value = false
     }
     //解封帖子
+        const unBanPost = async (id : number)=>{
+        try{
+            const response = await axios.put(`http://localhost:8080/user/post/unBanPost/${id}`,{},{
+                headers: { token: localStorage.getItem('token') || '' }
+            })
+
+            if(response.data.code === 1){
+                ElMessage.success('解封成功')
+            }else{
+                ElMessage.success('出现错误：',response.data.msg)
+            }
+
+        }catch{
+            ElMessage.error('解封失败')
+        }
+    }
     
     //封禁用户
     const confirmBanUser = async (userId:number,sectionId:number) => {
     try {
         
+            banForm.value.reason = ""
             const response = await axios.post('http://localhost:8080/user/sections/confirmBanUser',{
             userId: userId,
             sectionId: sectionId,
@@ -90,11 +107,58 @@ export default function(){
     banDialogVisible.value = false
     }
     //解封用户
+    const UnBanUser = async (id:number) => {
+    try {
+        
+            const response = await axios.put(`http://localhost:8080/user/sections/UnBanUser/${id}`,{},{
+            headers: { token: localStorage.getItem('token') || '' }
+            });
+            
+            if (response.data.code === 1) {
+            ElMessage.success('用户已解封');      
+            } else {
+            ElMessage.error('出现错误：',response.data.msg )
+            }
+        } catch (error) {
+            
+            ElMessage.error('操作出错');
+        }
+    }    
 
     //置顶帖子
-    const pinPost = async () => {
+    const pinPost = async (postId:number) => {
+        try{
+            const response = await axios.put(`http://localhost:8080/user/post/pinPost/${postId}`,{},{
+                headers: { token: localStorage.getItem('token') || '' }
+            })
+
+            if(response.data.code === 1){
+                ElMessage.success('置顶成功')
+            }else{
+                ElMessage.success('出现错误：',response.data.msg)
+            }
+
+        }catch {
+            ElMessage.error('置顶帖子失败');
+        }
     console.log('置顶帖子')
     }    
     //取消置顶
-    return {pinPost,confirmBanPost,confirmBanUser,checkUserModeratorStatus,isModerator,banDialogVisible,banForm}
+    const unpinPost = async (postId : number)=>{
+        try{
+            const response = await axios.put(`http://localhost:8080/user/post/unpinPost/${postId}`,{},{
+                headers: { token: localStorage.getItem('token') || '' }
+            })
+
+            if(response.data.code === 1){
+                ElMessage.success('取消成功')
+            }else{
+                ElMessage.success('出现错误：',response.data.msg)
+            }
+
+        }catch{
+            ElMessage.error('取消失败')
+        }
+    }
+    return {pinPost,unpinPost,confirmBanPost,unBanPost,UnBanUser,confirmBanUser,checkUserModeratorStatus,isModerator,banDialogVisible,banForm}
 }

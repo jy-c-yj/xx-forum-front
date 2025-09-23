@@ -115,7 +115,7 @@ const submitForm = async () => {
 
       router.push('/home');
     } else {
-      ElMessage.error(response.data.message || '登录失败');
+      ElMessage.error(response.data.msg || '登录失败');
     }
   } catch (error) {
         if (axios.isAxiosError(error)) {

@@ -38,6 +38,9 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+      meta: {
+        title: "登陆"
+      }
     },
     {
       path: '/home',

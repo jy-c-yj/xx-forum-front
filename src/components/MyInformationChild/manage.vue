@@ -45,7 +45,7 @@ onMounted(()=>{
 const refashtableDate = async ()=>{
 
   try{
-    const response = await axios.get('http://localhost:8080/user/myInformation/mySections',{
+    const response = await axios.get('http://localhost:8080/user/myInformation/manageSections',{
     headers :{
       token : localStorage.getItem('token')
     } 

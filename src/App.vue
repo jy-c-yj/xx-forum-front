@@ -15,7 +15,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import meau from '@/components/meau.vue'
 import search from '@/components/search.vue'
      
-
+document.title="xx-forum"
 </script>
 
 

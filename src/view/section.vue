@@ -373,6 +373,7 @@ const submitPost = async () => {
       sectionId.value = section.value.id // 这会触发posts组件重新加载
     } else {
       ElMessage.error(response.data.msg || '发帖失败')
+      console.log(response.data.msg)
     }
   } catch (error) {
     console.error('发帖请求失败:', error)
